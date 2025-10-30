@@ -1,0 +1,37 @@
+name: Test
+
+on:
+  push:
+    branches-ignore:
+      - main
+  workflow_call:
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting (eslint)
+        run: npm run lint
+
+      - name: Run format checking (prettier)
+        run: npm run format:check
+
+      - name: Run type checking and build
+        run: npm run build
+
+      - name: Run tests
+        run: npm run test
