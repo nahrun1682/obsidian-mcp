@@ -60,7 +60,7 @@ export function loadEnv(): void {
 
   const result = envPath ? dotenv.config({ path: envPath }) : dotenv.config(); // Fallback to default behavior
 
-  if (result.error && result.error.code !== 'ENOENT') {
+  if (result.error && (result.error as NodeJS.ErrnoException).code !== 'ENOENT') {
     throw result.error;
   }
 }
