@@ -45,7 +45,6 @@ async function authenticateToken(req: Request, res: Response, next: NextFunction
  * @param mcpServer - MCP server instance
  */
 export function registerMcpRoute(app: Express, mcpServer: McpServer): void {
-  // Health check endpoint
   app.get('/health', (_req, res) => {
     res.json({
       status: 'ok',
@@ -54,7 +53,6 @@ export function registerMcpRoute(app: Express, mcpServer: McpServer): void {
     });
   });
 
-  // SSE streaming not supported (Lambda limitation)
   app.get('/mcp', (_req, res) => {
     res.status(405).json({
       error: 'method_not_allowed',
@@ -62,7 +60,6 @@ export function registerMcpRoute(app: Express, mcpServer: McpServer): void {
     });
   });
 
-  // MCP endpoint handler
   const mcpHandler = async (req: Request, res: Response) => {
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
@@ -92,6 +89,5 @@ export function registerMcpRoute(app: Express, mcpServer: McpServer): void {
     }
   };
 
-  // Always require OAuth authentication
   app.post('/mcp', authenticateToken, mcpHandler);
 }

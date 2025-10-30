@@ -8,8 +8,6 @@ import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
 const REFRESH_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60;
 
-// ========== DATA TYPES ==========
-
 export interface SessionData {
   sessionId: string;
   authenticated: boolean;
@@ -46,8 +44,6 @@ export interface RefreshTokenData {
   accessToken: string;
 }
 
-// ========== REPOSITORY INTERFACES ==========
-
 /**
  * SessionRepository - Browser session management
  *
@@ -55,7 +51,6 @@ export interface RefreshTokenData {
  * Sessions track logged-in users in the browser.
  */
 export interface SessionRepository {
-  // Session CRUD operations
   getSession(sessionId: string): Promise<SessionData | null>;
   setSession(session: SessionData): Promise<void>;
   deleteSession(sessionId: string): Promise<void>;
@@ -70,17 +65,14 @@ export interface SessionRepository {
  * - Refresh tokens (long-lived tokens to obtain new access tokens)
  */
 export interface OAuthTokenRepository {
-  // Authorization Code operations (OAuth step 1)
   getAuthCode(code: string): Promise<AuthCodeData | null>;
   setAuthCode(data: AuthCodeData): Promise<void>;
   deleteAuthCode(code: string): Promise<void>;
 
-  // Access Token operations (OAuth step 2 - API authentication)
   getAccessToken(token: string): Promise<AccessTokenData | null>;
   setAccessToken(data: AccessTokenData): Promise<void>;
   deleteAccessToken(token: string): Promise<void>;
 
-  // Refresh Token operations (OAuth step 3 - token renewal)
   getRefreshToken(refreshToken: string): Promise<RefreshTokenData | null>;
   setRefreshToken(data: RefreshTokenData): Promise<void>;
   deleteRefreshToken(refreshToken: string): Promise<void>;
@@ -106,13 +98,10 @@ export interface AuthStore extends SessionRepository, OAuthTokenRepository {}
  * Note: Data is lost when process restarts.
  */
 export class InMemoryAuthStore implements AuthStore {
-  // Storage maps
   private sessions = new Map<string, SessionData>();
   private authCodes = new Map<string, AuthCodeData>();
   private accessTokens = new Map<string, AccessTokenData>();
   private refreshTokens = new Map<string, RefreshTokenData>();
-
-  // ========== SessionRepository Implementation ==========
 
   async getSession(sessionId: string): Promise<SessionData | null> {
     const session = this.sessions.get(sessionId);
@@ -141,9 +130,6 @@ export class InMemoryAuthStore implements AuthStore {
     this.sessions.delete(sessionId);
   }
 
-  // ========== OAuthTokenRepository Implementation ==========
-
-  // Authorization Code operations
   async getAuthCode(code: string): Promise<AuthCodeData | null> {
     return this.authCodes.get(code) || null;
   }
@@ -156,7 +142,6 @@ export class InMemoryAuthStore implements AuthStore {
     this.authCodes.delete(code);
   }
 
-  // Access Token operations
   async getAccessToken(token: string): Promise<AccessTokenData | null> {
     return this.accessTokens.get(token) || null;
   }
@@ -178,7 +163,6 @@ export class InMemoryAuthStore implements AuthStore {
     this.accessTokens.delete(token);
   }
 
-  // Refresh Token operations
   async getRefreshToken(refreshToken: string): Promise<RefreshTokenData | null> {
     return this.refreshTokens.get(refreshToken) || null;
   }
@@ -232,8 +216,6 @@ export class DynamoDbAuthStore implements AuthStore {
         region: options.region,
       });
   }
-
-  // ========== SessionRepository Implementation ==========
 
   async getSession(sessionId: string): Promise<SessionData | null> {
     try {
@@ -309,9 +291,6 @@ export class DynamoDbAuthStore implements AuthStore {
     );
   }
 
-  // ========== OAuthTokenRepository Implementation ==========
-
-  // Authorization Code operations
   async getAuthCode(code: string): Promise<AuthCodeData | null> {
     const result = await this.client.send(
       new GetItemCommand({
@@ -365,7 +344,6 @@ export class DynamoDbAuthStore implements AuthStore {
     );
   }
 
-  // Access Token operations
   async getAccessToken(token: string): Promise<AccessTokenData | null> {
     const result = await this.client.send(
       new GetItemCommand({
@@ -430,7 +408,6 @@ export class DynamoDbAuthStore implements AuthStore {
     }
   }
 
-  // Refresh Token operations
   async getRefreshToken(refreshToken: string): Promise<RefreshTokenData | null> {
     const result = await this.client.send(
       new GetItemCommand({

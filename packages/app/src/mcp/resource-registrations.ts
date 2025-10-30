@@ -25,7 +25,6 @@ export function registerResources(server: McpServer, getVaultManager: () => Vaul
       const vault = getVaultManager();
 
       try {
-        // Check if README.md exists in vault root
         const readmeExists = await vault.fileExists('README.md');
 
         if (!readmeExists) {
@@ -40,7 +39,6 @@ export function registerResources(server: McpServer, getVaultManager: () => Vaul
           };
         }
 
-        // Read the README content
         const content = await vault.readFile('README.md');
 
         return {

@@ -38,7 +38,6 @@ export function registerOAuthRoutes(app: Express, config: OAuthConfig): void {
     res.cookie('session_id', sessionId, sessionCookieOptions);
   };
 
-  // OAuth Discovery Endpoint (for MCP clients)
   app.get('/.well-known/oauth-authorization-server', (_req, res) => {
     res.json({
       issuer: baseUrl,
@@ -53,7 +52,6 @@ export function registerOAuthRoutes(app: Express, config: OAuthConfig): void {
     });
   });
 
-  // Login Page (GET /login)
   app.get('/login', async (req, res) => {
     let sessionId = req.cookies?.session_id;
     const session = sessionId ? await auth.getSession(sessionId) : null;
@@ -66,7 +64,6 @@ export function registerOAuthRoutes(app: Express, config: OAuthConfig): void {
     res.send(pages.loginPage());
   });
 
-  // Login Handler (POST /login)
   app.post('/login', async (req, res) => {
     const { token } = req.body;
     let sessionId = req.cookies?.session_id;
@@ -95,12 +92,10 @@ export function registerOAuthRoutes(app: Express, config: OAuthConfig): void {
     }
   });
 
-  // Authorization Endpoint (GET /oauth/authorize)
   app.get('/oauth/authorize', async (req, res) => {
     const { response_type, client_id, redirect_uri, state, code_challenge, code_challenge_method } =
       req.query;
 
-    // Check for missing required parameters first
     if (
       !response_type ||
       !client_id ||
@@ -165,7 +160,6 @@ export function registerOAuthRoutes(app: Express, config: OAuthConfig): void {
     return res.redirect('/oauth/consent');
   });
 
-  // Consent Screen (GET /oauth/consent)
   app.get('/oauth/consent', async (req, res) => {
     const sessionId = req.cookies?.session_id;
 
@@ -183,7 +177,6 @@ export function registerOAuthRoutes(app: Express, config: OAuthConfig): void {
     res.send(pages.consentPage(session.pendingAuthRequest.clientId));
   });
 
-  // Approve Authorization (POST /oauth/approve)
   app.post('/oauth/approve', async (req, res) => {
     const sessionId = req.cookies?.session_id;
 
@@ -214,7 +207,6 @@ export function registerOAuthRoutes(app: Express, config: OAuthConfig): void {
     res.redirect(redirectUrl.toString());
   });
 
-  // Deny Authorization (GET /oauth/deny)
   app.get('/oauth/deny', async (req, res) => {
     const sessionId = req.cookies?.session_id;
 
@@ -236,7 +228,6 @@ export function registerOAuthRoutes(app: Express, config: OAuthConfig): void {
     res.send(pages.errorPage('access_denied', 'Authorization was denied'));
   });
 
-  // Token Endpoint (POST /oauth/token)
   app.post('/oauth/token', async (req, res) => {
     const {
       grant_type,
@@ -309,7 +300,6 @@ export function registerOAuthRoutes(app: Express, config: OAuthConfig): void {
     });
   });
 
-  // Dynamic Client Registration (RFC 7591)
   app.post('/oauth/register', (req, res) => {
     const body = req.body ?? {};
     const redirectUris = body.redirect_uris;
@@ -349,7 +339,6 @@ export function registerOAuthRoutes(app: Express, config: OAuthConfig): void {
     });
   });
 
-  // Revocation Endpoint (POST /oauth/revoke)
   app.post('/oauth/revoke', async (req, res) => {
     const { token, client_id, client_secret } = req.body;
 

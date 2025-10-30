@@ -55,7 +55,6 @@ function findEnvFile(startDir: string): string | undefined {
 }
 
 export function loadEnv(): void {
-  // Recursively search for .env file starting from current working directory
   const envPath = findEnvFile(process.cwd());
 
   const result = envPath ? dotenv.config({ path: envPath }) : dotenv.config(); // Fallback to default behavior

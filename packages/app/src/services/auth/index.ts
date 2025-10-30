@@ -8,7 +8,6 @@
  * - PKCE verification
  */
 
-// Session Management
 export {
   createSession,
   getSession,
@@ -20,7 +19,6 @@ export {
   type Session,
 } from './session-manager.js';
 
-// OAuth Token Management
 export {
   createAuthorizationCode,
   exchangeCodeForToken,
@@ -30,7 +28,6 @@ export {
   validateClientCredentials,
 } from './oauth-tokens.js';
 
-// Auth Store Singleton & Factories
 export { getAuthStore, setAuthStore } from './auth-store-singleton.js';
 export {
   createInMemoryAuthStore,
@@ -38,5 +35,4 @@ export {
   type DynamoDbAuthStoreOptions,
 } from './auth-store.js';
 
-// PKCE Utilities (internal use primarily, but exported for testing)
 export { generateSecureToken, verifyCodeChallenge } from './pkce.js';

@@ -1,8 +1,6 @@
 import { VaultManager } from '@/services/vault-manager';
 import type { ToolResponse } from './types';
 
-// ========== DIRECTORY OPERATIONS ==========
-
 export async function handleCreateDirectory(
   vault: VaultManager,
   args: { path: string; recursive?: boolean },

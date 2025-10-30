@@ -1,8 +1,6 @@
 import { VaultManager } from '@/services/vault-manager';
 import type { ToolResponse, JournalConfig } from './types';
 
-// ========== FILE OPERATIONS ==========
-
 export async function handleReadNote(
   vault: VaultManager,
   args: { path: string },
@@ -120,7 +118,6 @@ export async function handleMoveNote(
         );
       }
 
-      // deleteFile will throw if trying to delete a directory
       await vault.deleteFile(args.destination_path);
     }
 
@@ -166,7 +163,6 @@ export async function handleAppendContent(
       throw new Error(`File ${args.path} does not exist`);
     }
 
-    // Use helper function to get or initialize content from template
     const currentContent = await getOrInitializeContent(vault, args.path, config);
 
     let newContent = currentContent;
@@ -214,7 +210,6 @@ export async function handlePatchContent(
       throw new Error(`File ${args.path} does not exist`);
     }
 
-    // Use helper function to get or initialize content from template
     const currentContent = await getOrInitializeContent(vault, args.path, config);
 
     let newContent: string;
@@ -260,8 +255,6 @@ export async function handlePatchContent(
   }
 }
 
-// ========== HELPER FUNCTIONS FOR PATCHING ==========
-
 function patchAtHeading(
   content: string,
   heading: string,
@@ -278,7 +271,6 @@ function patchAtHeading(
       } else if (position === 'after') {
         lines.splice(i + 1, 0, newContent);
       } else {
-        // Find next heading and replace content between
         let endIndex = i + 1;
         while (endIndex < lines.length && !/^#+\s+/.test(lines[endIndex])) {
           endIndex++;
@@ -386,27 +378,20 @@ export async function getOrInitializeContent(
     return await vault.readFile(path);
   }
 
-  // If no config provided, return empty content
   if (!config) {
     return '';
   }
 
-  // Check if path matches journal path template pattern
   const templatePattern = config.journalPathTemplate.replace('{{date}}', '(\\d{4}-\\d{2}-\\d{2})');
   const regex = new RegExp('^' + templatePattern + '$');
   const match = path.match(regex);
 
   if (!match) {
-    // Not a daily note, return empty content
     return '';
   }
 
-  // Extract date from path
   const dateStr = match[1];
-
-  // Read template file from vault
   const templateContent = await vault.readFile(config.journalFileTemplate);
 
-  // Replace {{date}} placeholders with actual date
   return templateContent.replace(/\{\{date\}\}/g, dateStr);
 }

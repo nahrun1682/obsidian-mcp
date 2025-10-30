@@ -1,8 +1,6 @@
 import { VaultManager } from '@/services/vault-manager';
 import type { ToolResponse } from './types';
 
-// ========== TAG MANAGEMENT ==========
-
 export async function handleAddTags(
   vault: VaultManager,
   args: {
@@ -255,8 +253,6 @@ export async function handleManageTags(
   }
 }
 
-// ========== TAG HELPER FUNCTIONS ==========
-
 function addTagsToFrontmatter(content: string, tags: string[], deduplicate: boolean): string {
   const lines = content.split('\n');
   let frontmatterEnd = -1;
@@ -340,12 +336,10 @@ function addInlineTags(
 
   const lines = content.split('\n');
 
-  // Find the first line in the body (after frontmatter) that contains inline tags
   let targetLineIndex = -1;
   let afterFrontmatter = false;
 
   for (let i = 0; i < lines.length; i++) {
-    // Skip frontmatter
     if (i === 0 && lines[i] === '---') {
       afterFrontmatter = false;
       continue;
@@ -356,18 +350,15 @@ function addInlineTags(
     }
     if (!afterFrontmatter) continue;
 
-    // Look for existing inline tags in body
     if (lines[i].includes('#')) {
       targetLineIndex = i;
       break;
     }
   }
 
-  // If we found a line with tags, append to that line
   if (targetLineIndex >= 0) {
     lines[targetLineIndex] += ' ' + tagsToAdd.map(t => `#${t}`).join(' ');
   } else {
-    // Otherwise append at the end
     const separator = content.endsWith('\n') ? '' : '\n';
     return {
       content: content + separator + tagsToAdd.map(t => `#${t}`).join(' '),

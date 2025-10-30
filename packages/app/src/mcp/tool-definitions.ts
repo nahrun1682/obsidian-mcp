@@ -1,7 +1,5 @@
 import { z } from 'zod';
 
-// ========== FILE OPERATIONS ==========
-
 export const ReadNoteSchema = {
   inputSchema: {
     path: z.string().describe('Path to the note file (e.g., "folder/note.md")'),
@@ -92,8 +90,6 @@ export const PatchContentSchema = {
   },
 };
 
-// ========== DIRECTORY OPERATIONS ==========
-
 export const CreateDirectorySchema = {
   inputSchema: {
     path: z.string().describe('Path for the new directory'),
@@ -140,8 +136,6 @@ export const ListFilesInDirSchema = {
   },
 };
 
-// ========== SEARCH ==========
-
 export const SearchVaultSchema = {
   inputSchema: {
     query: z.string().describe('Search query string'),
@@ -177,8 +171,6 @@ export const SearchVaultSchema = {
     total_files: z.number(),
   },
 };
-
-// ========== TAG MANAGEMENT ==========
 
 export const AddTagsSchema = {
   inputSchema: {
@@ -257,8 +249,6 @@ export const ManageTagsSchema = {
       .optional(),
   },
 };
-
-// ========== JOURNAL LOGGING ==========
 
 export const LogJournalEntrySchema = {
   inputSchema: {

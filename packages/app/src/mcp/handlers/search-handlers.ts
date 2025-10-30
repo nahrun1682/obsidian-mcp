@@ -1,8 +1,6 @@
 import { VaultManager } from '@/services/vault-manager';
 import type { ToolResponse } from './types';
 
-// ========== SEARCH ==========
-
 export async function handleSearchVault(
   vault: VaultManager,
   args: {
@@ -117,8 +115,6 @@ export async function handleSearchVault(
     };
   }
 }
-
-// ========== HELPER FUNCTIONS ==========
 
 function escapeRegExp(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
