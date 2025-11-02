@@ -58,6 +58,16 @@ export class GitVaultManager implements VaultManager {
   }
 
   /**
+   * Remove the vault directory completely
+   */
+  private async removeVault(): Promise<void> {
+    if (existsSync(this.config.vaultPath)) {
+      console.error('Removing vault directory for fresh clone...');
+      await fs.rm(this.config.vaultPath, { recursive: true, force: true });
+    }
+  }
+
+  /**
    * Clone the vault repository (cold start)
    */
   private async cloneVault(): Promise<void> {
@@ -104,7 +114,9 @@ export class GitVaultManager implements VaultManager {
 
       console.error('Vault synced with remote');
     } catch (error) {
-      console.warn('Failed to sync with remote, using cached vault:', error);
+      console.error('Sync failed, removing vault and performing fresh clone:', error);
+      await this.removeVault();
+      await this.cloneVault();
     }
   }
 
