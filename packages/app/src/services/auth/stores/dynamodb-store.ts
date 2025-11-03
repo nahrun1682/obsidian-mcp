@@ -195,7 +195,7 @@ export class DynamoDbAuthStore implements AuthStore {
       createdAt: tokenData.createdAt,
       expiresAt: tokenData.expiresAt,
       scope: tokenData.scope,
-      [this.ttlAttribute]: Math.floor(tokenData.expiresAt / 1000),
+      [this.ttlAttribute]: Math.floor(Date.now() / 1000) + REFRESH_TOKEN_TTL_SECONDS,
     };
 
     await this.client.send(
