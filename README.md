@@ -10,11 +10,11 @@ This MCP server provides **16 tools** and **1 resource** to interact with your O
 
 **Tools** (organized into 5 categories):
 
-- File Operations (7 tools) - Read, create, edit, delete, move, append, and patch notes
-- Directory Operations (3 tools) - Create directories and list files
-- Search (1 tool) - Fuzzy search with fuse.js, optional exact matching, and relevance scoring
-- Tag Management (4 tools) - Add, remove, rename, and manage tags
-- Journal Logging (1 tool) - Auto-log LLM activity to daily journals
+- File Operations (7) - Read, create, edit, delete, move, append, and patch notes
+- Directory Operations (3) - Create directories and list files
+- Search - Fuzzy search with fuse.js, optional exact matching, and relevance scoring
+- Tag Management (4) - Add, remove, rename, and manage tags
+- Journal Logging - Auto-log LLM activity to daily journals
 
 **Resources**:
 
@@ -39,51 +39,28 @@ This enables LLM access to your vault without Obsidian being open, and keeps all
 
 ## Prerequisites
 
-- Node.js 22+ and npm
+**For Local Deployment:**
+- Node.js 22+ and npm, or
+- Docker
 
-## Git-based Vault Setup
+**For Remote (AWS) Deployment:**
+- AWS Account with AWS Lambda access
+
+## Vault Requirements
 
 Before using this server, ensure your Obsidian vault is:
 
 1. **Git-initialized** - Your vault must be a git repository
-2. **Pushed to remote** - Hosted on GitHub, GitLab, or similar
+2. **Pushed to remote** - Hosted on GitHub
 3. **Sync-enabled** - We recommend [obsidian-git](https://github.com/Vinzent03/obsidian-git) plugin for automatic sync
 
 The server will clone your vault, make changes, and push them back. Your Obsidian clients should regularly pull to stay in sync.
 
-### Creating a GitHub Personal Access Token
-
-You'll need a PAT with `repo` scope to authenticate git operations:
-
-1. Go to https://github.com/settings/tokens
-2. Generate new token (classic)
-3. Select scopes: `repo` (all)
-4. Copy token and save securely - you'll use it during setup
-
-### Required GitHub Scopes
-
-The server requires these GitHub permissions:
-
-- `repo` (all) - Full control of private repositories for read/write/push operations
+**Required GitHub Scopes:** Personal Access Token needs `repo` (all)
 
 ## Installation & Setup
 
-### How Authentication Works
-
-#### Stdio Mode (single-user, pre-configured)
-
-1. Git Credentials - GitHub PAT configured in `.env` file
-2. Vault Access - Server clones vault using PAT on startup
-3. Auto-Sync - Changes automatically committed and pushed to git
-4. Persistence - Credentials persist across runs via `.env`
-
-#### HTTP Mode (single-user, OAuth)
-
-1. OAuth Flow - User authorization through personal auth token (MCP OAuth → Git Access)
-2. Git Credentials - GitHub PAT stored in environment/session
-3. Session Storage - Sessions stored in-memory (local) or DynamoDB (Lambda)
-4. Auto-Sync - Changes committed/pushed per-session
-5. Persistence - Sessions expire after configured timeout (default: 24 hours)
+### Option 1: Using npm
 
 ```bash
 # Clone and install
@@ -101,43 +78,20 @@ cp .env.example .env
 # Edit .env and fill in required fields
 ```
 
-This repository uses npm workspaces:
-
-- `packages/app` – runtime server code (local stdio/http + Lambda handler)
-- `packages/cdk` – AWS infrastructure stack
-
-**Required for all modes:**
-
-- `VAULT_REPO` - Your git repository URL
-- `VAULT_BRANCH` - Branch to use (typically `main`)
-- `GITHUB_PAT` - Personal access token with `repo` scope
-- `JOURNAL_PATH_TEMPLATE` - Journal path template (e.g., `journal/{{date}}.md`)
-- `JOURNAL_DATE_FORMAT` - Date format for journal entries (e.g., `YYYY-MM-DD`)
-- `JOURNAL_ACTIVITY_SECTION` - Heading for journal entries (e.g., `## Journal`)
-- `JOURNAL_FILE_TEMPLATE` - Template file for new journal entries (e.g., `Templates/Daily Note.md`)
-
-**Required for HTTP/OAuth mode only:**
-
-- `OAUTH_CLIENT_ID` - OAuth client identifier (default: `obsidian-mcp-client`)
-- `OAUTH_CLIENT_SECRET` - OAuth client secret (generate with crypto, see below)
-- `PERSONAL_AUTH_TOKEN` - Your personal login password (generate with crypto, see below)
-- `BASE_URL` - Server URL (e.g., `http://localhost:3000` or Lambda URL)
-
-**Optional:**
-
-- `LOCAL_VAULT_PATH` - Local vault directory path (default: `./vault-local`)
-- `PORT` - HTTP server port for local development (default: `3000`)
-- `AWS_REGION` - AWS region for CDK deployment (default: `us-east-1`)
-- `SESSION_EXPIRY_MS` - Session lifetime in milliseconds (default: `86400000` = 24 hours)
-
-**Generate secure secrets** (for HTTP/OAuth mode):
+### Option 2: Using Docker
 
 ```bash
-# OAuth client secret (shared with MCP clients)
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+# Pull the image
+docker pull ghcr.io/eddmann/obsidian-mcp:latest
+```
 
-# Personal auth token (your login password)
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+Then configure credentials:
+
+```bash
+# Copy example env template
+cp .env.example obsidian-mcp.env
+
+# Edit obsidian-mcp.env and fill in required fields
 ```
 
 ## Transport Modes
@@ -172,27 +126,40 @@ Add to your configuration file:
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 
-### Using Built Version
+### Using npm
 
 ```json
 {
   "mcpServers": {
     "obsidian": {
-      "command": "node",
-      "args": ["/ABSOLUTE/PATH/TO/obsidian-mcp/dist/app/server/local/stdio.js"]
+      "command": "npm",
+      "args": [
+        "run",
+        "--prefix",
+        "/ABSOLUTE/PATH/TO/obsidian-mcp",
+        "dev"
+      ]
     }
   }
 }
 ```
 
-### Using tsx (no build needed)
+### Using Docker
 
 ```json
 {
   "mcpServers": {
     "obsidian": {
-      "command": "npx",
-      "args": ["tsx", "/ABSOLUTE/PATH/TO/obsidian-mcp/packages/app/src/server/local/stdio.ts"]
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "/ABSOLUTE/PATH/TO/obsidian-mcp.env:/app/.env",
+        "ghcr.io/eddmann/obsidian-mcp:latest",
+        "stdio"
+      ]
     }
   }
 }
@@ -205,51 +172,21 @@ Add to your configuration file:
 Start the server in HTTP mode for remote deployment:
 
 ```bash
-# Local development
+# Using npm
 npm run dev:http
 
-# Or build and run
-npm run build
-node dist/app/server/local/http.js
+# Using Docker
+docker run -p 3000:3000 --rm \
+  -v "/ABSOLUTE/PATH/TO/obsidian-mcp.env:/app/.env" \
+  ghcr.io/eddmann/obsidian-mcp:latest \
+  http
 ```
 
 Environment variables can be configured in your `.env` file (see Installation & Setup above).
 
-### Local Development with ngrok
-
-To test ChatGPT integration locally:
-
-1. **Start the server in HTTP mode**:
-
-   ```bash
-   npm run dev:http
-   ```
-
-2. **In a separate terminal, expose via ngrok**:
-
-   ```bash
-   ngrok http 3000
-   ```
-
-3. **Update environment**: Set `BASE_URL` to your ngrok URL:
-
-   ```bash
-   export BASE_URL=https://abc123.ngrok.io
-   ```
-
-   Or add to your `.env` file:
-
-   ```
-   BASE_URL=https://abc123.ngrok.io
-   ```
-
-4. **Restart the server** to pick up the new base URL
-
-5. **Configure ChatGPT**: Use the ngrok URL (with `/mcp` path) as your MCP server endpoint
-
 ## Usage
 
-Ask Claude to interact with your Obsidian vault using natural language.
+Ask your LLM to interact with your Obsidian vault using natural language.
 
 ### File Operations
 
@@ -300,44 +237,44 @@ The journal tool automatically creates/appends to daily journal files with times
 
 ### File Operations (7 tools)
 
-| Tool             | Description                                                                              |
-| ---------------- | ---------------------------------------------------------------------------------------- |
-| `read-note`      | Read the contents of a note file                                                         |
-| `create-note`    | Create a new note with content (commits/pushes to git)                                   |
-| `edit-note`      | Replace entire note content                                                              |
-| `delete-note`    | Delete a note file (with confirmation)                                                   |
-| `move-note`      | Move or rename a note                                                                    |
-| `append-content` | Append content to existing or new file                                                   |
-| `patch-content`  | Insert content at specific location (heading, block ID, line number, or frontmatter key) |
+| Tool             | Description                                                                                   |
+| ---------------- | --------------------------------------------------------------------------------------------- |
+| `read-note`      | Read the contents of a note file                                                              |
+| `create-note`    | Create a new note with content                                                                |
+| `edit-note`      | Replace the entire content of a note                                                          |
+| `delete-note`    | Delete a note file                                                                            |
+| `move-note`      | Move or rename a note                                                                         |
+| `append-content` | Append content to an existing or new file                                                     |
+| `patch-content`  | Insert content at a specific location (heading, 1-based line number, block, or frontmatter)  |
 
 ### Directory Operations (3 tools)
 
-| Tool                  | Description                                         |
-| --------------------- | --------------------------------------------------- |
-| `create-directory`    | Create new directories (with recursive option)      |
-| `list-files-in-vault` | List all files in vault root with filtering options |
-| `list-files-in-dir`   | List files in a specific directory                  |
+| Tool                  | Description                        |
+| --------------------- | ---------------------------------- |
+| `create-directory`    | Create a new directory in the vault|
+| `list-files-in-vault` | List all files in the vault root   |
+| `list-files-in-dir`   | List files in a specific directory |
 
 ### Search (1 tool)
 
-| Tool           | Description                                                                                                    |
-| -------------- | -------------------------------------------------------------------------------------------------------------- |
-| `search-vault` | Fuzzy search with fuse.js (optional exact matching), relevance scoring, context lines, and file type filtering |
+| Tool           | Description                                                                    |
+| -------------- | ------------------------------------------------------------------------------ |
+| `search-vault` | Fuzzy or exact search across vault filenames and content with relevance scoring |
 
 ### Tag Management (4 tools)
 
-| Tool          | Description                                                  |
-| ------------- | ------------------------------------------------------------ |
-| `add-tags`    | Add tags to a note (frontmatter or inline)                   |
-| `remove-tags` | Remove tags from a note                                      |
-| `rename-tag`  | Rename a tag across all notes in vault (with dry-run option) |
-| `manage-tags` | List all tags, count usage, or merge duplicate tags          |
+| Tool          | Description                                     |
+| ------------- | ----------------------------------------------- |
+| `add-tags`    | Add tags to a note (frontmatter or inline)      |
+| `remove-tags` | Remove tags from a note                         |
+| `rename-tag`  | Rename a tag across all notes in the vault      |
+| `manage-tags` | List, count, or merge tags across the vault     |
 
 ### Journal Logging (1 tool)
 
-| Tool                | Description                                                                                                               |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `log-journal-entry` | Automatically log activity to daily journal with timestamps, activity type, summary, topics, outputs, and project linking |
+| Tool                | Description                                      |
+| ------------------- | ------------------------------------------------ |
+| `log-journal-entry` | Automatically log work to today's journal entry  |
 
 ## Available Resources
 
@@ -351,49 +288,6 @@ MCP resources provide contextual information that LLMs can access on-demand with
 
 **Usage**: If your vault contains a README.md file in its root directory, LLMs can access it through this resource to understand how your vault is organized. This helps the LLM make better decisions about where to create files, how to structure notes, and follow your vault's conventions.
 
-**Example vault README.md**:
-
-```markdown
-# My Vault Organization
-
-## Folder Structure
-
-- `/Projects/` - Active project notes
-- `/Archive/` - Completed projects
-- `/Daily/` - Daily notes and journals
-- `/Templates/` - Note templates
-
-## Conventions
-
-- Use YAML frontmatter for metadata
-- Tag projects with #project/name
-- Link related notes with [[wikilinks]]
-```
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Run in stdio mode (for Claude Desktop)
-npm run dev
-
-# Run in HTTP mode with OAuth (for testing with curl or ChatGPT)
-npm run dev:http
-
-# Build TypeScript + Lambda bundle
-npm run build
-
-# Synthesize infrastructure (builds lambda bundle first)
-npm run cdk:synth
-
-# Deploy to AWS via CDK
-npm run cdk:deploy
-
-# Destroy the stack when done
-npm run cdk:destroy
-```
 
 ## License
 
