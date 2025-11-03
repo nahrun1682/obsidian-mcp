@@ -202,7 +202,7 @@ async function performExactSearch(
             return {
               path,
               match_type: 'content' as const,
-              relevance_score: calculateExactScore(lines, query, matchingLines),
+              relevance_score: calculateExactScore(query, matchingLines),
               matches: matchingLines,
             };
           }
@@ -289,7 +289,6 @@ function fuseScoreToRelevance(score: number): 1 | 2 | 3 | 4 {
 }
 
 function calculateExactScore(
-  lines: string[],
   query: string,
   matches: Array<{ line: number; content: string }>,
 ): 1 | 2 | 3 | 4 {
