@@ -46,10 +46,10 @@ This enables LLM access to your vault without Obsidian being open, and keeps all
 
 **Vault Requirements:**
 
-1. **Git-initialized Obsidian vault** - Your vault must be a git repository
-2. **Pushed to GitHub** - Vault must be hosted on a GitHub remote
-3. **GitHub Personal Access Token** - PAT with `repo` scope (full repository access)
-4. **Sync-enabled** (recommended) - We recommend [obsidian-git](https://github.com/Vinzent03/obsidian-git) plugin for automatic sync
+1. Git-initialized Obsidian vault - Your vault must be a git repository
+2. Pushed to GitHub - Vault must be hosted on a GitHub remote
+3. GitHub Personal Access Token - PAT with `repo` scope (full repository access)
+4. Sync-enabled (recommended) - We recommend [obsidian-git](https://github.com/Vinzent03/obsidian-git) plugin for automatic sync
 
 The server will clone your vault, make changes, and push them back. Your Obsidian clients should regularly pull to stay in sync.
 
@@ -238,47 +238,42 @@ Ask your LLM to interact with your Obsidian vault using natural language.
 ### File Operations
 
 ```
-"Read my daily note for today"
-"Create a new note called 'Meeting Notes' in the Work folder"
-"Append my todo list to today's note"
-"Add a new section under the '## Ideas' heading in my brainstorm note"
-"Move 'draft.md' to the Archive folder"
-"Delete my old scratch notes"
+"Can you read my project note at Projects/MCP-Server.md?"
+"Create a new meeting note in Work/Meetings for today's standup"
+"Add a task list to my project plan under the Action Items section"
 ```
 
 ### Directory Operations
 
 ```
-"Create a new folder called 'Projects/New Project'"
-"List all markdown files in my vault"
-"Show me what's in the Archive directory"
+"Set up a new folder structure for my research papers"
+"What markdown files do I have in my vault?"
+"Show me all the PDFs in my Resources folder"
 ```
 
 ### Search
 
 ```
-"Search for all notes mentioning 'machine learning'"
-"Find notes with TODO items"
-"Search for notes about 'project alpha' and show context"
+"Find all my notes about machine learning"
+"Where did I write about TODO items?"
+"Search my Projects folder for anything about deployment"
 ```
 
 ### Tag Management
 
 ```
-"Add tags #work and #important to my meeting note"
-"Remove the #draft tag from all notes"
-"Rename the tag #todo to #task across my vault"
-"Show me all tags and their usage counts"
+"Tag my meeting note with work and urgent"
+"I want to consolidate my todo tags into a single task tag"
+"What tags am I using the most?"
 ```
 
 ### Journal Logging
 
 ```
-"Log this conversation to my journal: we discussed MCP server setup"
-"Add a journal entry about today's coding work on the Obsidian project"
+"Log today's work: I implemented OAuth for the MCP server using TypeScript and AWS"
+"Add a journal entry about my Rust research - I learned about async patterns and tokio"
+"Journal this: spent time learning TypeScript generics and created some helper utilities"
 ```
-
-The journal tool automatically creates/appends to daily journal files with timestamps, activity types, and project linking.
 
 ## Available Tools
 
