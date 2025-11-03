@@ -1,5 +1,6 @@
 import { getAuthStore } from './auth-store-singleton.js';
 import { generateSecureToken, verifyCodeChallenge } from './pkce.js';
+import { logger } from '@/utils/logger';
 
 const AUTH_CODE_EXPIRY = 10 * 60 * 1000;
 const ACCESS_TOKEN_EXPIRY = 60 * 60 * 1000;
@@ -157,7 +158,7 @@ export function validateClientCredentials(clientId: string, clientSecret: string
   const validClientSecret = process.env.OAUTH_CLIENT_SECRET;
 
   if (!validClientSecret) {
-    console.error('OAUTH_CLIENT_SECRET not configured');
+    logger.error('OAUTH_CLIENT_SECRET not configured');
     return false;
   }
 

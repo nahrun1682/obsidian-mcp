@@ -5,6 +5,7 @@ import type {
   AccessTokenData,
   RefreshTokenData,
 } from './types.js';
+import { logger } from '@/utils/logger';
 
 export class InMemoryAuthStore implements AuthStore {
   private sessions = new Map<string, SessionData>();
@@ -85,6 +86,6 @@ export class InMemoryAuthStore implements AuthStore {
 }
 
 export function createInMemoryAuthStore(): AuthStore {
-  console.error('[auth-store] Creating in-memory auth store');
+  logger.info('Creating in-memory auth store');
   return new InMemoryAuthStore();
 }

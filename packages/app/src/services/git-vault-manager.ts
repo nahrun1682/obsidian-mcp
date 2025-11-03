@@ -3,6 +3,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { existsSync } from 'fs';
 import { VaultManager } from './vault-manager';
+import { logger } from '@/utils/logger';
 
 export interface VaultConfig {
   repoUrl: string;
@@ -44,10 +45,10 @@ export class GitVaultManager implements VaultManager {
     const vaultExists = existsSync(this.config.vaultPath);
 
     if (!vaultExists) {
-      console.error(`Cloning vault from ${this.config.repoUrl}...`);
+      logger.info(`Cloning vault from ${this.config.repoUrl}...`);
       await this.cloneVault();
     } else {
-      console.error('Vault exists, syncing with remote...');
+      logger.info('Vault exists, syncing with remote...');
       await this.syncVault();
     }
   }
@@ -57,7 +58,7 @@ export class GitVaultManager implements VaultManager {
    */
   private async removeVault(): Promise<void> {
     if (existsSync(this.config.vaultPath)) {
-      console.error('Removing vault directory for fresh clone...');
+      logger.info('Removing vault directory for fresh clone...');
       await fs.rm(this.config.vaultPath, { recursive: true, force: true });
     }
   }
@@ -92,7 +93,7 @@ export class GitVaultManager implements VaultManager {
       await vaultGit.remote(['set-url', 'origin', authUrl]);
 
       // Fetch latest remote state with timeout
-      console.error('Fetching latest changes from remote...');
+      logger.info('Fetching latest changes from remote...');
       await Promise.race([
         vaultGit.fetch('origin', this.config.branch),
         new Promise<void>((_, reject) =>
@@ -101,15 +102,15 @@ export class GitVaultManager implements VaultManager {
       ]);
 
       // Reset to clean "as cloned" state - matches remote exactly
-      console.error('Resetting vault to clean state...');
+      logger.info('Resetting vault to clean state...');
       await vaultGit.reset(['--hard', `origin/${this.config.branch}`]);
 
       // Remove untracked files and directories (-f = force, -d = directories, -x = ignored files)
       await vaultGit.clean('fdx');
 
-      console.error('Vault synced with remote');
+      logger.info('Vault synced with remote');
     } catch (error) {
-      console.error('Sync failed, removing vault and performing fresh clone:', error);
+      logger.error('Sync failed, removing vault and performing fresh clone', { error });
       await this.removeVault();
       await this.cloneVault();
     }
@@ -130,7 +131,7 @@ export class GitVaultManager implements VaultManager {
 
     const status = await vaultGit.status();
     if (status.files.length === 0) {
-      console.error('No changes to commit');
+      logger.debug('No changes to commit');
       return;
     }
 
@@ -149,7 +150,7 @@ export class GitVaultManager implements VaultManager {
         // Ensure remote URL has credentials before pushing
         await vaultGit.remote(['set-url', 'origin', authUrl]);
         await vaultGit.push('origin', this.config.branch);
-        console.error('Successfully pushed changes');
+        logger.info('Successfully pushed changes');
         return;
       } catch (error) {
         if (attempt === maxAttempts) {
@@ -157,7 +158,7 @@ export class GitVaultManager implements VaultManager {
         }
 
         const delay = Math.pow(2, attempt) * 1000;
-        console.warn(`Push attempt ${attempt} failed, retrying in ${delay}ms...`);
+        logger.warn(`Push attempt ${attempt} failed, retrying in ${delay}ms...`, { attempt, delay });
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }

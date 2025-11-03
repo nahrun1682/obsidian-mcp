@@ -21,8 +21,14 @@ import { createInMemoryAuthStore } from '@/services/auth/stores';
 import { setAuthStore } from '@/services/auth';
 import { loadEnv, ensureEnvVars } from '@/env';
 import { MCP_SERVER_INSTRUCTIONS } from '@/server/shared/instructions';
+import { configureLogger } from '@/utils/logger';
 
 loadEnv();
+
+configureLogger({
+  stream: process.stdout,
+  minLevel: (process.env.LOG_LEVEL as any) || 'info',
+});
 
 try {
   ensureEnvVars();
@@ -76,7 +82,7 @@ registerMcpRoute(app, mcpServer);
 const PORT = parseInt(process.env.PORT || '3000');
 
 app.listen(PORT, () => {
-  console.error(`
+  console.log(`
 ╔═══════════════════════════════════════════════════════════╗
 ║  Obsidian MCP Server (OAuth 2.0 Protected)               ║
 ╠═══════════════════════════════════════════════════════════╣

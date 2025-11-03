@@ -17,8 +17,14 @@ import { createDynamoDbAuthStore } from '@/services/auth/stores';
 import { setAuthStore } from '@/services/auth';
 import { ensureEnvVars } from '@/env';
 import { MCP_SERVER_INSTRUCTIONS } from '@/server/shared/instructions';
+import { configureLogger, logger } from '@/utils/logger';
 import express from 'express';
 import serverless from 'serverless-http';
+
+configureLogger({
+  stream: process.stdout,
+  minLevel: (process.env.LOG_LEVEL as any) || 'info',
+});
 
 const tableName = process.env.SESSION_DYNAMODB_TABLE;
 const region = process.env.SESSION_DYNAMODB_REGION || process.env.AWS_REGION || 'us-east-1';
@@ -79,7 +85,7 @@ let coldStartLogged = false;
 function logColdStartConfig() {
   if (!coldStartLogged) {
     coldStartLogged = true;
-    console.error('[lambda] Cold start - Auth store configured:', {
+    logger.info('Lambda cold start - Auth store configured', {
       type: 'DynamoDB',
       tableName,
       region,
@@ -99,7 +105,7 @@ app.use((req, _res, next) => {
     logColdStartConfig();
   }
 
-  console.error('Lambda invoked:', {
+  logger.info('Lambda invoked', {
     startType,
     invocation: getInvocationCount(),
     path: req.path,
@@ -108,7 +114,7 @@ app.use((req, _res, next) => {
   });
 
   if (getInvocationCount() === 1) {
-    cleanupOldCache().catch(err => console.error('Cache cleanup error:', err));
+    cleanupOldCache().catch(err => logger.error('Cache cleanup error', { error: err }));
   }
 
   next();

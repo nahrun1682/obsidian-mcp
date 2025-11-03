@@ -1,6 +1,7 @@
 import Fuse from 'fuse.js';
 import { VaultManager } from '@/services/vault-manager';
 import type { ToolResponse } from './types';
+import { logger } from '@/utils/logger';
 
 interface SearchResult {
   path: string;
@@ -125,7 +126,7 @@ async function performFuzzySearch(
             lines,
           });
         } catch (error) {
-          console.warn(`Error reading ${path}:`, error);
+          logger.warn(`Error reading file during search`, { path, error });
         }
       }),
     );
@@ -211,7 +212,7 @@ async function performExactSearch(
 
           return null;
         } catch (error) {
-          console.warn(`Error searching ${path}:`, error);
+          logger.warn(`Error searching file`, { path, error });
           return null;
         }
       }),

@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { getAuthStore } from './auth-store-singleton.js';
 import type { SessionData } from './stores/types.js';
+import { logger } from '@/utils/logger';
 
 const SESSION_EXPIRY_MS = Number(process.env.SESSION_EXPIRY_MS || 24 * 60 * 60 * 1000);
 
@@ -27,7 +28,7 @@ export async function createSession(): Promise<string> {
 
     return sessionId;
   } catch (error) {
-    console.error('[auth] Error creating session:', error);
+    logger.error('Error creating session', { error });
     throw error;
   }
 }
@@ -52,7 +53,7 @@ export async function getSession(sessionId: string): Promise<Session | null> {
 
     return session;
   } catch (error) {
-    console.error('[auth] Error getting session:', error);
+    logger.error('Error getting session', { error });
     return null;
   }
 }
@@ -70,7 +71,7 @@ export async function authenticateSession(
   const validToken = process.env.PERSONAL_AUTH_TOKEN;
 
   if (!validToken) {
-    console.error('PERSONAL_AUTH_TOKEN not configured');
+    logger.error('PERSONAL_AUTH_TOKEN not configured');
     return false;
   }
 
@@ -111,7 +112,7 @@ export async function storePendingAuthRequest(
     const session = await getSession(sessionId);
 
     if (!session) {
-      console.error('[auth] Session not found:', sessionId);
+      logger.debug('Session not found', { sessionId });
       return false;
     }
 
@@ -131,7 +132,7 @@ export async function storePendingAuthRequest(
 
     return true;
   } catch (error) {
-    console.error('[auth] Error storing pending auth request:', error);
+    logger.error('Error storing pending auth request', { error });
     return false;
   }
 }

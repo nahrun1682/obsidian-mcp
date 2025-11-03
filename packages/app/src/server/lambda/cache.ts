@@ -1,6 +1,7 @@
 import * as fs from 'fs/promises';
 import * as crypto from 'crypto';
 import { existsSync } from 'fs';
+import { logger } from '@/utils/logger';
 
 export interface FileIndexEntry {
   path: string;
@@ -41,7 +42,7 @@ export async function loadFileIndex(): Promise<FileIndex | null> {
       files,
     };
   } catch (error) {
-    console.warn('Failed to load file index cache:', error);
+    logger.warn('Failed to load file index cache', { error });
     return null;
   }
 }
@@ -57,7 +58,7 @@ export async function saveFileIndex(index: FileIndex): Promise<void> {
 
     await fs.writeFile(INDEX_CACHE_PATH, data, 'utf-8');
   } catch (error) {
-    console.warn('Failed to save file index cache:', error);
+    logger.warn('Failed to save file index cache', { error });
   }
 }
 
@@ -119,7 +120,7 @@ export async function cleanupOldCache(): Promise<void> {
           }
         }
       } catch (error) {
-        console.warn(`Failed to clean up ${file}:`, error);
+        logger.warn(`Failed to clean up file`, { file, error });
       }
     }
   }

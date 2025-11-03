@@ -12,6 +12,7 @@ import type {
   AccessTokenData,
   RefreshTokenData,
 } from './types.js';
+import { logger } from '@/utils/logger';
 
 const REFRESH_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60;
 
@@ -71,7 +72,7 @@ export class DynamoDbAuthStore implements AuthStore {
 
       return session;
     } catch (error) {
-      console.error('[DynamoDB] Error getting session:', error);
+      logger.error('DynamoDB error getting session', { error });
       throw error;
     }
   }
@@ -97,7 +98,7 @@ export class DynamoDbAuthStore implements AuthStore {
         }),
       );
     } catch (error) {
-      console.error('[DynamoDB] Error setting session:', error);
+      logger.error('DynamoDB error setting session', { error });
       throw error;
     }
   }
@@ -275,7 +276,7 @@ export class DynamoDbAuthStore implements AuthStore {
 }
 
 export function createDynamoDbAuthStore(options: DynamoDbAuthStoreOptions): AuthStore {
-  console.error('[auth-store] Creating DynamoDB auth store:', {
+  logger.info('Creating DynamoDB auth store', {
     tableName: options.tableName,
     region: options.region,
     ttlAttribute: options.ttlAttribute || 'ttl',

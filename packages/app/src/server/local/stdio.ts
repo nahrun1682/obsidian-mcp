@@ -16,8 +16,15 @@ import { registerTools } from '@/mcp/tool-registrations';
 import { registerResources } from '@/mcp/resource-registrations';
 import { loadEnv, ensureCoreEnvVars } from '@/env';
 import { MCP_SERVER_INSTRUCTIONS } from '@/server/shared/instructions';
+import { configureLogger } from '@/utils/logger';
 
 loadEnv();
+
+// Configure logger to write to stderr (stdout is reserved for JSON-RPC protocol)
+configureLogger({
+  stream: process.stderr,
+  minLevel: (process.env.LOG_LEVEL as any) || 'info',
+});
 
 try {
   ensureCoreEnvVars();

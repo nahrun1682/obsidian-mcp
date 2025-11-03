@@ -8,6 +8,7 @@ import { Express, Request, Response, NextFunction } from 'express';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import * as auth from '@/services/auth';
+import { logger } from '@/utils/logger';
 
 /**
  * OAuth middleware to authenticate Bearer tokens
@@ -74,7 +75,7 @@ export function registerMcpRoute(app: Express, mcpServer: McpServer): void {
       await mcpServer.connect(transport);
       await transport.handleRequest(req, res, req.body);
     } catch (error) {
-      console.error('[mcp] Error handling MCP request:', error);
+      logger.error('Error handling MCP request', { error });
       if (!res.headersSent) {
         res.status(500).json({
           jsonrpc: '2.0',
