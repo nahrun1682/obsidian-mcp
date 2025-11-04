@@ -16,11 +16,11 @@ Complete documentation for all 18 MCP tools provided by the Obsidian MCP Server.
 
 Read the contents of a note file.
 
-**Parameters:**
+#### Parameters
 
 - `path` (string, required) - Path to the note file (e.g., "folder/note.md")
 
-**Example:**
+#### Example
 
 ```
 "Read my project note at Projects/MCP-Server.md"
@@ -32,16 +32,16 @@ Read the contents of a note file.
 
 Read multiple notes in a single request for improved efficiency.
 
-**Parameters:**
+#### Parameters
 
 - `paths` (array of strings, required) - Array of note file paths
 
-**Features:**
+#### Features
 
 - Handles partial success (returns successful reads even if some files fail)
 - More efficient than multiple `read-note` calls
 
-**Example:**
+#### Example
 
 ```
 "Read all my daily notes from Journal/2024-01.md, Journal/2024-02.md, and Journal/2024-03.md"
@@ -53,18 +53,18 @@ Read multiple notes in a single request for improved efficiency.
 
 Create a new note with content.
 
-**Parameters:**
+#### Parameters
 
 - `path` (string, required) - Path for the new note
 - `content` (string, required) - Content of the note
 - `overwrite` (boolean, optional, default: false) - Overwrite if file exists
 
-**Features:**
+#### Features
 
 - Automatically creates parent directories if needed
 - Fails if file exists (unless overwrite is true)
 
-**Example:**
+#### Example
 
 ```
 "Create a new meeting note in Work/Meetings/2024-01-15.md with the standup agenda"
@@ -76,12 +76,12 @@ Create a new note with content.
 
 Replace the entire content of an existing note.
 
-**Parameters:**
+#### Parameters
 
 - `path` (string, required) - Path to the note to edit
 - `content` (string, required) - New content (replaces entire file)
 
-**Example:**
+#### Example
 
 ```
 "Replace the content of my README.md with an updated version"
@@ -93,12 +93,12 @@ Replace the entire content of an existing note.
 
 Permanently delete a note file from the vault.
 
-**Parameters:**
+#### Parameters
 
 - `path` (string, required) - Path to the file to delete
 - `confirm` (boolean, required) - Must be true to confirm deletion
 
-**Example:**
+#### Example
 
 ```
 "Delete the old draft at Drafts/old-ideas.md"
@@ -110,13 +110,13 @@ Permanently delete a note file from the vault.
 
 Move a note to a different directory or rename it.
 
-**Parameters:**
+#### Parameters
 
 - `source_path` (string, required) - Current path of the file
 - `destination_path` (string, required) - New path for the file
 - `overwrite` (boolean, optional, default: false) - Overwrite if destination exists
 
-**Example:**
+#### Example
 
 ```
 "Move Work/temp.md to Archive/2024/temp.md"
@@ -128,14 +128,14 @@ Move a note to a different directory or rename it.
 
 Append content to the end of an existing note, or create a new note if it doesn't exist.
 
-**Parameters:**
+#### Parameters
 
 - `path` (string, required) - Path to the file
 - `content` (string, required) - Content to append
 - `create_if_missing` (boolean, optional, default: true) - Create file if it doesn't exist
 - `newline` (boolean, optional, default: true) - Add newline before content
 
-**Example:**
+#### Example
 
 ```
 "Add a new task to my TODO.md: '- Review pull requests'"
@@ -147,7 +147,7 @@ Append content to the end of an existing note, or create a new note if it doesn'
 
 Insert or update content at specific locations using semantic anchors.
 
-**Parameters:**
+#### Parameters
 
 - `path` (string, required) - Path to the file
 - `content` (string, required) - Content to insert
@@ -156,13 +156,13 @@ Insert or update content at specific locations using semantic anchors.
 - `position` (string, required) - Where to insert: "before", "after", or "replace"
 - `create_if_missing` (boolean, optional, default: true) - Create file if missing
 
-**Anchor Types:**
+#### Anchor Types
 
 #### heading
 
 Matches Markdown headings (e.g., `## Section Title`).
 
-**Example:**
+#### Example
 
 ```
 "Add a new section after the '## Introduction' heading"
@@ -172,7 +172,7 @@ Matches Markdown headings (e.g., `## Section Title`).
 
 Matches Obsidian block identifiers (e.g., `^block-id`).
 
-**Example:**
+#### Example
 
 ```
 "Insert content after the paragraph with ^important-note"
@@ -182,7 +182,7 @@ Matches Obsidian block identifiers (e.g., `^block-id`).
 
 Updates YAML frontmatter key-value pairs. Creates frontmatter if it doesn't exist. Position is always 'replace'.
 
-**Example:**
+#### Example
 
 ```
 "Update the tags in the frontmatter to include 'project' and 'active'"
@@ -192,20 +192,20 @@ Updates YAML frontmatter key-value pairs. Creates frontmatter if it doesn't exis
 
 Matches exact text content (single-line or multi-line). **Recommended for precise targeting.**
 
-**Features:**
+#### Features
 
 - Multi-line support: Use `\n` to match multiple consecutive lines for uniqueness
 - Ambiguity detection: Fails with helpful error if pattern matches multiple locations
 - Error guidance: Shows all match locations with context
 - Exact whitespace matching (preserves spaces, tabs, indentation)
 
-**Example:**
+#### Example
 
 ```
 "Insert a note after the paragraph that says 'This is important'"
 ```
 
-**When to use text_match:**
+#### When to use text_match
 
 - Need precise content matching without relying on line numbers
 - Same text appears multiple times (add surrounding lines for uniqueness)
@@ -217,18 +217,18 @@ Matches exact text content (single-line or multi-line). **Recommended for precis
 
 Apply a unified diff patch to a file using standard diff format.
 
-**Parameters:**
+#### Parameters
 
 - `path` (string, required) - Path to the file to patch
 - `diff` (string, required) - Unified diff patch in standard format
 
-**Features:**
+#### Features
 
 - Supports multi-hunk diffs (multiple changes in one patch)
 - Strict matching (no fuzz) - patch must match current file content exactly
 - Standard unified diff format (same as git diff)
 
-**Example diff format:**
+#### Example diff format
 
 ```
 @@ -10,3 +10,3 @@
@@ -238,14 +238,14 @@ Apply a unified diff patch to a file using standard diff format.
  Context line after
 ```
 
-**When to use:**
+#### When to use
 
 - You have a unified diff patch from another source or tool
 - Want to make multiple precise changes at specific line numbers
 - Prefer standard diff format over anchor-based patching
 - LLM naturally generated changes in diff format
 
-**Comparison with patch-content:**
+#### Comparison with patch-content
 
 - `patch-content` uses semantic anchors (headings, blocks, text patterns) - better when file structure changes
 - `apply-diff-patch` uses line numbers - better for precise, multiple edits at known locations
@@ -258,12 +258,12 @@ Apply a unified diff patch to a file using standard diff format.
 
 Create a new directory in the vault.
 
-**Parameters:**
+#### Parameters
 
 - `path` (string, required) - Path for the new directory
 - `recursive` (boolean, optional, default: true) - Create parent directories
 
-**Example:**
+#### Example
 
 ```
 "Create a new folder structure: Projects/2024/Q1"
@@ -275,13 +275,13 @@ Create a new directory in the vault.
 
 List all files in the vault root.
 
-**Parameters:**
+#### Parameters
 
 - `file_types` (array of strings, optional) - Filter by file extensions (e.g., ["md", "pdf"])
 - `include_directories` (boolean, optional, default: false) - Include directories in results
 - `recursive` (boolean, optional, default: true) - List files recursively
 
-**Example:**
+#### Example
 
 ```
 "Show me all markdown files in my vault"
@@ -293,14 +293,14 @@ List all files in the vault root.
 
 List files in a specific directory.
 
-**Parameters:**
+#### Parameters
 
 - `path` (string, required) - Directory path to list
 - `file_types` (array of strings, optional) - Filter by file extensions
 - `include_directories` (boolean, optional, default: false) - Include directories in results
 - `recursive` (boolean, optional, default: true) - List files recursively
 
-**Example:**
+#### Example
 
 ```
 "List all PDFs in my Resources folder"
@@ -314,7 +314,7 @@ List files in a specific directory.
 
 Fuzzy or exact search across vault filenames and content with relevance scoring.
 
-**Parameters:**
+#### Parameters
 
 - `query` (string, required) - Search query string
 - `exact` (boolean, optional, default: false) - Use exact substring matching instead of fuzzy search
@@ -322,7 +322,7 @@ Fuzzy or exact search across vault filenames and content with relevance scoring.
 - `limit` (number, optional, default: 50) - Maximum number of results
 - `path_filter` (string, optional) - Filter results by path pattern
 
-**Features:**
+#### Features
 
 - Fuzzy search powered by fuse.js with relevance scoring
 - Optional exact substring matching
@@ -330,7 +330,7 @@ Fuzzy or exact search across vault filenames and content with relevance scoring.
 - File type filtering
 - Path pattern filtering
 
-**Examples:**
+#### Examples
 
 Fuzzy search:
 
@@ -358,14 +358,14 @@ Search in specific folder:
 
 Add tags to a note (frontmatter or inline).
 
-**Parameters:**
+#### Parameters
 
 - `path` (string, required) - Path to the note
 - `tags` (array of strings, required) - Tags to add (without # prefix)
 - `location` (string, optional, default: "frontmatter") - Where to add tags: "frontmatter", "inline", or "both"
 - `deduplicate` (boolean, optional, default: true) - Remove duplicate tags
 
-**Example:**
+#### Example
 
 ```
 "Add the tags 'project' and 'urgent' to my meeting note"
@@ -377,13 +377,13 @@ Add tags to a note (frontmatter or inline).
 
 Remove tags from a note.
 
-**Parameters:**
+#### Parameters
 
 - `path` (string, required) - Path to the note
 - `tags` (array of strings, required) - Tags to remove (without # prefix)
 - `location` (string, optional, default: "both") - Where to remove from: "frontmatter", "inline", or "both"
 
-**Example:**
+#### Example
 
 ```
 "Remove the 'draft' tag from my completed article"
@@ -395,20 +395,20 @@ Remove tags from a note.
 
 Rename a tag across all notes in the vault.
 
-**Parameters:**
+#### Parameters
 
 - `old_tag` (string, required) - Tag to rename (without # prefix)
 - `new_tag` (string, required) - New tag name (without # prefix)
 - `case_sensitive` (boolean, optional, default: false) - Case-sensitive matching
 - `dry_run` (boolean, optional, default: false) - Preview changes without applying
 
-**Features:**
+#### Features
 
 - Updates both frontmatter and inline tags
 - Works across all notes in vault
 - Dry run mode to preview changes
 
-**Example:**
+#### Example
 
 ```
 "Rename all 'todo' tags to 'task' across my vault"
@@ -420,7 +420,7 @@ Rename a tag across all notes in the vault.
 
 List, count, or merge tags across the vault.
 
-**Parameters:**
+#### Parameters
 
 - `action` (string, required) - Action to perform: "list", "count", or "merge"
 - `tag` (string, optional) - Tag to operate on (for count action)
@@ -428,13 +428,13 @@ List, count, or merge tags across the vault.
 - `include_nested` (boolean, optional, default: true) - Include nested tags
 - `sort_by` (string, optional, default: "name") - Sort results by: "name" or "count"
 
-**Actions:**
+#### Actions
 
 #### list
 
 List all tags in the vault with usage counts.
 
-**Example:**
+#### Example
 
 ```
 "Show me all the tags I'm using in my vault"
@@ -444,7 +444,7 @@ List all tags in the vault with usage counts.
 
 Count usage of a specific tag.
 
-**Example:**
+#### Example
 
 ```
 "How many notes use the 'project' tag?"
@@ -454,7 +454,7 @@ Count usage of a specific tag.
 
 Merge multiple tags into a single tag.
 
-**Example:**
+#### Example
 
 ```
 "Merge my 'todo' and 'task' tags into a single 'task' tag"
@@ -468,7 +468,7 @@ Merge multiple tags into a single tag.
 
 Automatically log work to today's journal entry.
 
-**Parameters:**
+#### Parameters
 
 - `activity_type` (string, required) - Type of activity: "development", "research", "writing", "planning", "learning", or "problem-solving"
 - `summary` (string, required) - 1-2 sentence summary of the work
@@ -476,21 +476,21 @@ Automatically log work to today's journal entry.
 - `outputs` (array of strings, optional) - Concrete deliverables or artifacts created
 - `project` (string, optional) - Related project for linking (e.g., "Projects/Obsidian MCP")
 
-**Features:**
+#### Features
 
 - Auto-creates journal from template if it doesn't exist
 - Adds timestamped entries to configured section
 - Links to related projects
 - Formatted with activity type, topics, and outputs
 
-**Configuration (in .env):**
+#### Configuration (in .env)
 
 - `JOURNAL_PATH_TEMPLATE` - Path template with `{{date}}` placeholder (e.g., "Journal/{{date}}.md")
 - `JOURNAL_DATE_FORMAT` - Date format for template expansion (e.g., "YYYY-MM-DD")
 - `JOURNAL_ACTIVITY_SECTION` - Heading for journal entries (e.g., "## Activity")
 - `JOURNAL_FILE_TEMPLATE` - Template file for new journals (e.g., "Templates/daily-note.md")
 
-**Example:**
+#### Example
 
 ```
 "Log today's work: I implemented OAuth for the MCP server using TypeScript and AWS Lambda"

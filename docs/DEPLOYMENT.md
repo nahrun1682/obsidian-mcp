@@ -80,26 +80,26 @@ Stdio mode uses standard input/output for communication with local MCP clients l
 
 ### Using npm
 
-**1. Install dependencies:**
+1. Install dependencies:
 
 ```bash
 npm install
 ```
 
-**2. Configure environment:**
+2. Configure environment:
 
 ```bash
 cp .env.example .env
 # Edit .env with your vault repo and git token
 ```
 
-**3. Run the server:**
+3. Run the server:
 
 ```bash
 npm run dev
 ```
 
-**4. Configure your MCP client:**
+4. Configure your MCP client:
 
 #### Claude Desktop
 
@@ -118,7 +118,7 @@ Add to your config file:
 }
 ```
 
-**Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
@@ -150,20 +150,20 @@ Add to your Cursor MCP settings:
 
 ### Using Docker
 
-**1. Pull the image:**
+1. Pull the image:
 
 ```bash
 docker pull ghcr.io/eddmann/obsidian-mcp:latest
 ```
 
-**2. Configure environment:**
+2. Configure environment:
 
 ```bash
 cp .env.example obsidian-mcp.env
 # Edit obsidian-mcp.env with your configuration
 ```
 
-**3. Test the server:**
+3. Test the server:
 
 ```bash
 docker run -i --rm \
@@ -172,7 +172,7 @@ docker run -i --rm \
   stdio
 ```
 
-**4. Configure your MCP client:**
+4. Configure your MCP client:
 
 #### Claude Desktop
 
@@ -197,7 +197,7 @@ docker run -i --rm \
 }
 ```
 
-**Windows:**
+Windows:
 
 ```json
 {
@@ -232,7 +232,7 @@ HTTP mode provides OAuth-secured remote access for ChatGPT, Claude web, and othe
 
 ### Local Deployment
 
-**Using npm:**
+Using npm:
 
 ```bash
 # 1. Configure environment (including OAuth variables)
@@ -245,7 +245,7 @@ npm run dev:http
 
 Server starts at `http://localhost:3000` by default.
 
-**Using Docker:**
+Using Docker:
 
 ```bash
 docker run -p 3000:3000 --rm \
@@ -258,20 +258,20 @@ docker run -p 3000:3000 --rm \
 
 For testing with ChatGPT or remote clients:
 
-**1. Start ngrok:**
+1. Start ngrok:
 
 ```bash
 ngrok http 3000
 ```
 
-**2. Update BASE_URL:**
+2. Update BASE_URL:
 
 ```bash
 # In your .env file:
 BASE_URL=https://your-ngrok-url.ngrok.io
 ```
 
-**3. Restart server:**
+3. Restart server:
 
 ```bash
 npm run dev:http
@@ -281,13 +281,13 @@ npm run dev:http
 
 HTTP mode uses OAuth 2.0 Authorization Code Flow with PKCE:
 
-**1. Register OAuth session:**
+1. Register OAuth session:
 
 ```bash
 POST /oauth/register
 ```
 
-**2. Authorize:**
+2. Authorize:
 
 ```
 GET /oauth/authorize?client_id=...&redirect_uri=...&state=...&code_challenge=...
@@ -295,7 +295,7 @@ GET /oauth/authorize?client_id=...&redirect_uri=...&state=...&code_challenge=...
 
 User logs in with `PERSONAL_AUTH_TOKEN`.
 
-**3. Exchange code for token:**
+3. Exchange code for token:
 
 ```bash
 POST /oauth/token
@@ -304,7 +304,7 @@ Content-Type: application/x-www-form-urlencoded
 grant_type=authorization_code&code=...&client_id=...&redirect_uri=...&code_verifier=...
 ```
 
-**4. Access MCP endpoint:**
+4. Access MCP endpoint:
 
 ```bash
 POST /mcp
@@ -313,29 +313,29 @@ Authorization: Bearer <access_token>
 
 ### ChatGPT Integration
 
-**1. Start server in HTTP mode (local or remote)**
+1. Start server in HTTP mode (local or remote)
 
-**2. In ChatGPT, go to Settings > MCP Servers**
+2. In ChatGPT, go to Settings > MCP Servers
 
-**3. Add new server:**
+3. Add new server:
 
 - Name: Obsidian MCP
 - URL: Your server URL (e.g., `https://your-ngrok-url.ngrok.io` or Lambda Function URL)
 - Authentication: OAuth 2.0
 
-**4. Complete OAuth flow with your PERSONAL_AUTH_TOKEN**
+4. Complete OAuth flow with your PERSONAL_AUTH_TOKEN
 
-**5. Start chatting with your vault!**
+5. Start chatting with your vault!
 
 ### Session Management
 
-**Local HTTP mode:**
+Local HTTP mode:
 
 - Sessions stored in memory
 - Lost on server restart
 - Default expiry: 24 hours
 
-**Lambda mode:**
+Lambda mode:
 
 - Sessions stored in DynamoDB
 - Persist across Lambda invocations
@@ -357,13 +357,13 @@ Deploy to AWS Lambda for production remote access with DynamoDB session storage.
 
 ### Deployment Steps
 
-**1. Install dependencies:**
+1. Install dependencies:
 
 ```bash
 npm install
 ```
 
-**2. Configure environment:**
+2. Configure environment:
 
 ```bash
 cp .env.example .env
@@ -373,13 +373,13 @@ cp .env.example .env
 #   - JOURNAL_* variables (journal configuration)
 ```
 
-**3. Bootstrap CDK (first time only):**
+3. Bootstrap CDK (first time only):
 
 ```bash
 npx cdk bootstrap
 ```
 
-**4. Deploy to AWS:**
+4. Deploy to AWS:
 
 ```bash
 npm run cdk:deploy
@@ -392,14 +392,14 @@ This will:
 - Deploy Lambda function with Function URL
 - Set up CloudWatch logs
 
-**5. Note the Function URL from deployment output:**
+5. Note the Function URL from deployment output:
 
 ```
 Outputs:
 ObsidianMcpStack.FunctionUrl = https://abc123.lambda-url.us-east-1.on.aws/
 ```
 
-**6. Update BASE_URL and redeploy:**
+6. Update BASE_URL and redeploy:
 
 ```bash
 # In .env:
@@ -413,7 +413,7 @@ npm run cdk:deploy
 
 The CDK stack provisions:
 
-**Lambda Function:**
+Lambda Function:
 
 - Runtime: Docker image (ARM64)
 - Memory: 2GB
@@ -421,25 +421,25 @@ The CDK stack provisions:
 - Timeout: 60 seconds
 - Function URL: Public HTTPS endpoint with CORS
 
-**DynamoDB Table:**
+DynamoDB Table:
 
 - Session storage with TTL
 - Removal policy: RETAIN (manual deletion required after stack destruction)
 
-**CloudWatch Logs:**
+CloudWatch Logs:
 
 - Log group with 1-week retention
 - Automatic log streaming
 
 ### Monitoring
 
-**View logs:**
+View logs:
 
 ```bash
 aws logs tail /aws/lambda/ObsidianMcpFunction --follow
 ```
 
-**View DynamoDB sessions:**
+View DynamoDB sessions:
 
 ```bash
 aws dynamodb scan --table-name ObsidianMcpSessions
@@ -449,20 +449,20 @@ aws dynamodb scan --table-name ObsidianMcpSessions
 
 Lambda uses `/tmp/obsidian-vault` for git cache persistence:
 
-- **First invocation (cold):** Clones vault (~5-10s depending on vault size)
-- **Subsequent invocations (warm):** Reuses cached vault (~1-2s for git pull)
+- First invocation (cold): Clones vault (~5-10s depending on vault size)
+- Subsequent invocations (warm): Reuses cached vault (~1-2s for git pull)
 
 The cache persists across warm starts and is automatically cleaned after the first invocation.
 
 ### Updating Deployment
 
-**Update code or configuration:**
+Update code or configuration:
 
 ```bash
 npm run cdk:deploy
 ```
 
-**Update environment variables only:**
+Update environment variables only:
 
 ```bash
 # Edit .env
@@ -471,7 +471,7 @@ npm run cdk:deploy
 
 ### Cleanup
 
-**Destroy stack:**
+Destroy stack:
 
 ```bash
 npm run cdk:destroy

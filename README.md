@@ -1,5 +1,7 @@
 # Obsidian MCP Server
 
+![Obsidian MCP Server](docs/heading.png)
+
 A Model Context Protocol (MCP) server for git-backed Obsidian vaults. Access and manage your notes through Claude, ChatGPT, and other LLMs by syncing changes via git.
 
 ## Table of Contents
@@ -22,19 +24,19 @@ A Model Context Protocol (MCP) server for git-backed Obsidian vaults. Access and
 
 This MCP server provides **18 tools** and **1 resource** to interact with your Obsidian vault through LLMs:
 
-**Tool Categories:**
+Tool Categories:
 
-- **File Operations** (9) - Read, create, edit, delete, move, append, and patch notes
-- **Directory Operations** (3) - Create directories and list files
-- **Search** (1) - Fuzzy search with relevance scoring and exact matching
-- **Tag Management** (4) - Add, remove, rename, and manage tags
-- **Journal Logging** (1) - Auto-log LLM activity to daily journals
+- File Operations (9) - Read, create, edit, delete, move, append, and patch notes
+- Directory Operations (3) - Create directories and list files
+- Search (1) - Fuzzy search with relevance scoring and exact matching
+- Tag Management (4) - Add, remove, rename, and manage tags
+- Journal Logging (1) - Auto-log LLM activity to daily journals
 
-**Deployment Modes:**
+Deployment Modes:
 
-- **Stdio** - Local deployment for Claude Desktop, Cursor
-- **HTTP** - Local/remote with OAuth for ChatGPT, Claude web
-- **AWS Lambda** - Serverless deployment with DynamoDB sessions
+- Stdio - Local deployment for Claude Desktop, Cursor
+- HTTP - Local/remote with OAuth for ChatGPT, Claude web
+- AWS Lambda - Serverless deployment with DynamoDB sessions
 
 ## Quick Start
 
@@ -120,7 +122,7 @@ cp .env.example .env
 
 **3. Add to Claude Desktop config:**
 
-**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 
 ```json
 {
@@ -133,7 +135,7 @@ cp .env.example .env
 }
 ```
 
-**Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
@@ -163,7 +165,7 @@ graph LR
     style C fill:#7c3aed
 ```
 
-**Workflow:**
+Workflow:
 
 1. Server clones/pulls your vault from git
 2. LLM makes changes through MCP tools
@@ -184,17 +186,17 @@ This enables LLM access without Obsidian being open, with all changes synchroniz
 <details>
 <summary><b>Vault Requirements</b></summary>
 
-1. **Git-initialized Obsidian vault** - Your vault must be a git repository
-2. **Pushed to a remote** - Supports GitHub, GitLab, Bitbucket, or self-hosted
-3. **Git Personal Access Token** - See [Git Providers documentation](docs/GIT_PROVIDERS.md)
-4. **Sync-enabled (recommended)** - Use [obsidian-git](https://github.com/Vinzent03/obsidian-git) plugin for automatic sync
+1. Git-initialized Obsidian vault - Your vault must be a git repository
+2. Pushed to a remote - Supports GitHub, GitLab, Bitbucket, or self-hosted
+3. Git Personal Access Token - See [Git Providers documentation](docs/GIT_PROVIDERS.md)
+4. Sync-enabled (recommended) - Use [obsidian-git](https://github.com/Vinzent03/obsidian-git) plugin for automatic sync
 </details>
 
 ## Deployment Options
 
 ### Claude Desktop (Local)
 
-**Using Docker:**
+Using Docker:
 
 See [Quick Start](#quick-start) above for the recommended Docker-based setup.
 
@@ -212,9 +214,9 @@ cp .env.example .env
 # Edit .env with your vault repo and git token
 ```
 
-**Claude Desktop config:**
+Claude Desktop config:
 
-**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 
 ```json
 {
@@ -227,7 +229,7 @@ cp .env.example .env
 }
 ```
 
-**Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
@@ -246,7 +248,7 @@ cp .env.example .env
 
 Run the server in HTTP mode with OAuth authentication:
 
-**Using Docker:**
+Using Docker:
 
 ```bash
 docker run -p 3000:3000 --rm \
@@ -255,7 +257,7 @@ docker run -p 3000:3000 --rm \
   http
 ```
 
-**Using npm:**
+Using npm:
 
 ```bash
 # First clone the repo if you haven't already
@@ -271,7 +273,7 @@ cp .env.example .env
 npm run dev:http
 ```
 
-**Required environment variables:**
+Required environment variables:
 
 - All core variables (see `.env.example`)
 - OAuth variables: `OAUTH_CLIENT_ID`, `OAUTH_CLIENT_SECRET`, `PERSONAL_AUTH_TOKEN`, `BASE_URL`
@@ -298,14 +300,14 @@ cp .env.example .env
 npm run cdk:deploy
 ```
 
-**What gets deployed:**
+What gets deployed:
 
 - Lambda function (ARM64, 2GB memory, 10GB storage)
 - DynamoDB table with TTL-based sessions
 - Function URL with CORS enabled
 - CloudWatch logs (1-week retention)
 
-**Cleanup:**
+Cleanup:
 
 ```bash
 npm run cdk:destroy
@@ -467,9 +469,9 @@ If your vault contains a README.md file in its root directory, LLMs can access i
 
 ## Documentation
 
-- **[Tool Reference](docs/TOOLS.md)** - Detailed documentation for all 18 tools with usage examples
-- **[Deployment Guide](docs/DEPLOYMENT.md)** - Complete deployment instructions for all modes
-- **[Git Providers](docs/GIT_PROVIDERS.md)** - Setup instructions for GitHub, GitLab, Bitbucket, and self-hosted providers
+- [Tool Reference](docs/TOOLS.md) - Detailed documentation for all 18 tools with usage examples
+- [Deployment Guide](docs/DEPLOYMENT.md) - Complete deployment instructions for all modes
+- [Git Providers](docs/GIT_PROVIDERS.md) - Setup instructions for GitHub, GitLab, Bitbucket, and self-hosted providers
 
 ## License
 
