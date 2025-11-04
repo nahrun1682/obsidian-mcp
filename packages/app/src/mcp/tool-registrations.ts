@@ -186,7 +186,7 @@ export function registerTools(server: McpServer, getVaultManager: () => VaultMan
     {
       title: 'Patch Content',
       description:
-        'Insert content at a specific location (heading, 1-based line number, block, or frontmatter)',
+        'Insert content at a specific location (heading, block, text match, or frontmatter)',
       inputSchema: toolDefs.PatchContentSchema.inputSchema,
       outputSchema: toolDefs.PatchContentSchema.outputSchema,
       annotations: {

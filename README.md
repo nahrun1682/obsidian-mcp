@@ -2,175 +2,60 @@
 
 A Model Context Protocol (MCP) server for git-backed Obsidian vaults. Access and manage your notes through Claude, ChatGPT, and other LLMs by syncing changes via git.
 
-[![Node.js 22+](https://img.shields.io/badge/node.js-22+-green.svg)](https://nodejs.org/)
+## Table of Contents
+
+- [Overview](#overview)
+- [Quick Start](#quick-start)
+- [How It Works](#how-it-works)
+- [Prerequisites](#prerequisites)
+- [Deployment Options](#deployment-options)
+  - [Claude Desktop (Local)](#claude-desktop-local)
+  - [ChatGPT & Remote Clients](#chatgpt--remote-clients)
+  - [AWS Lambda](#aws-lambda)
+- [Usage Examples](#usage-examples)
+- [Tool Reference](#tool-reference)
+- [Resources](#resources)
+- [Documentation](#documentation)
+- [License](#license)
 
 ## Overview
 
-This MCP server provides **18 tools** and **1 resource** to interact with your Obsidian vault:
+This MCP server provides **18 tools** and **1 resource** to interact with your Obsidian vault through LLMs:
 
-**Tools** (organized into 5 categories):
+**Tool Categories:**
 
-- File Operations (9) - Read, create, edit, delete, move, append, and patch notes
-- Directory Operations (3) - Create directories and list files
-- Search - Fuzzy search with fuse.js, optional exact matching, and relevance scoring
-- Tag Management (4) - Add, remove, rename, and manage tags
-- Journal Logging - Auto-log LLM activity to daily journals
+- **File Operations** (9) - Read, create, edit, delete, move, append, and patch notes
+- **Directory Operations** (3) - Create directories and list files
+- **Search** (1) - Fuzzy search with relevance scoring and exact matching
+- **Tag Management** (4) - Add, remove, rename, and manage tags
+- **Journal Logging** (1) - Auto-log LLM activity to daily journals
 
-**Resources**:
+**Deployment Modes:**
 
-- Vault README - On-demand access to vault organization guidelines and structure
+- **Stdio** - Local deployment for Claude Desktop, Cursor
+- **HTTP** - Local/remote with OAuth for ChatGPT, Claude web
+- **AWS Lambda** - Serverless deployment with DynamoDB sessions
 
-**Deployment Options (all single-user):**
+## Quick Start
 
-- **Stdio Mode**: Local deployment (e.g., Claude Desktop, Cursor)
-- **HTTP Mode**: Local HTTP deployment with OAuth (e.g., local MCP clients)
-- **AWS Lambda**: Remote HTTP deployment with OAuth and DynamoDB session persistence (e.g., ChatGPT, remote MCP deployment)
-
-## How It Works
-
-This server is designed for **git-backed Obsidian vaults** managed by plugins like [obsidian-git](https://github.com/Vinzent03/obsidian-git). The workflow:
-
-1. **Pull** - Server clones/pulls your vault from a git repository
-2. **Modify** - LLM makes changes through MCP tools (create notes, add tags, etc.)
-3. **Push** - Server automatically commits and pushes changes back to git
-4. **Sync** - Your Obsidian clients pull changes to reflect updates
-
-This enables LLM access to your vault without Obsidian being open, and keeps all clients synchronized through git.
-
-## Prerequisites
-
-**System Requirements:**
-
-- Node.js 22+ and npm, OR Docker (for local deployment)
-- AWS Account with Lambda access (for remote AWS deployment only)
-
-**Vault Requirements:**
-
-1. Git-initialized Obsidian vault - Your vault must be a git repository
-2. Pushed to a git remote - Supports GitHub, GitLab, Bitbucket, or self-hosted git providers
-3. Git Personal Access Token - See [Supported Git Providers](#supported-git-providers) section below
-4. Sync-enabled (recommended) - We recommend [obsidian-git](https://github.com/Vinzent03/obsidian-git) plugin for automatic sync
-
-The server will clone your vault, make changes, and push them back. Your Obsidian clients should regularly pull to stay in sync.
-
-## Supported Git Providers
-
-The server automatically detects your git provider from the repository URL and uses the appropriate authentication method:
-
-### GitHub
-
-- Token Type: Personal Access Token (PAT)
-- Required Scopes: `repo` (full repository access)
-- Example URL: `https://github.com/username/vault-repo.git`
-- Setup: [Create a PAT](https://github.com/settings/tokens) with `repo` scope
-
-### GitLab
-
-- Token Type: Personal Access Token (PAT)
-- Required Scopes: `api` (grants complete read/write access)
-- Example URL: `https://gitlab.com/username/vault-repo.git`
-- Setup: [Create a PAT](https://gitlab.com/-/profile/personal_access_tokens) with `api` scope
-- Note: Also works with self-hosted GitLab instances (e.g., `https://gitlab.company.com/repo.git`)
-
-### Bitbucket
-
-- Token Type: App Password
-- Required Permissions: Repository read and write
-- Example URL: `https://bitbucket.org/username/vault-repo.git`
-- Setup: [Create an App Password](https://bitbucket.org/account/settings/app-passwords/) with repository read/write permissions
-
-### Self-Hosted / Generic
-
-- Token Type: Personal Access Token or password
-- Required Config: Both `GIT_TOKEN` and `GIT_USERNAME` environment variables
-- Example Providers: Gitea, Gogs, custom git servers
-- Example URL: `https://git.mycompany.com/repo.git`
-- Setup: Consult your git provider's documentation for authentication tokens
-
-The server automatically determines your provider based on the repository URL hostname. No manual configuration needed!
-
-## Installation & Setup
-
-### Option 1: Using npm
+Get started with Claude Desktop in 3 steps using Docker:
 
 ```bash
-# Clone and install
-git clone https://github.com/eddmann/obsidian-mcp
-cd obsidian-mcp
-npm install
+# 1. Download the example environment file
+curl -O https://raw.githubusercontent.com/eddmann/obsidian-mcp/main/.env.example
+mv .env.example obsidian-mcp.env
+
+# 2. Edit obsidian-mcp.env with your vault repo and git token
+# Required fields:
+#   VAULT_REPO=https://github.com/username/vault-repo.git
+#   VAULT_BRANCH=main
+#   GIT_TOKEN=your_token_here
 ```
 
-Then configure credentials:
+**3. Add to Claude Desktop config:**
 
-```bash
-# Copy example env template
-cp .env.example .env
-
-# Edit .env and fill in required fields
-```
-
-### Option 2: Using Docker
-
-```bash
-# Pull the image
-docker pull ghcr.io/eddmann/obsidian-mcp:latest
-```
-
-Then configure credentials:
-
-```bash
-# Copy example env template
-cp .env.example obsidian-mcp.env
-
-# Edit obsidian-mcp.env and fill in required fields
-```
-
-## Transport Modes
-
-The server supports two transport modes selected via runtime configuration (stdio is default for local development):
-
-### Stdio Mode (Default)
-
-Uses standard input/output for communication with a single pre-configured vault.
-
-- Authentication: Pre-configured git token and vault settings in `.env` file
-- Users: Single user per deployment
-- Setup: Configure `.env` once, credentials persist across runs
-- Token Storage: Local `.env` file
-- Best for: Claude Desktop, Cursor, local MCP clients
-
-### HTTP Mode (Streamable HTTP)
-
-Uses HTTP transport with OAuth for secure remote access.
-
-- Authentication: OAuth 2.0 with personal token login (MCP OAuth → Git Access)
-- Users: Single user (vault owner) with session-based access
-- Setup: Environment-based configuration + OAuth secrets
-- Token Storage: In-memory (local HTTP) or DynamoDB (Lambda)
-- Session Lifetime: Configurable (default: 24 hours)
-- Best for: ChatGPT, Claude web, remote deployments, AWS Lambda
-
-## Claude Desktop Configuration
-
-Add to your configuration file:
-
-- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
-
-### Using npm
-
-```json
-{
-  "mcpServers": {
-    "obsidian": {
-      "command": "npm",
-      "args": ["run", "--prefix", "/ABSOLUTE/PATH/TO/obsidian-mcp", "dev"]
-    }
-  }
-}
-```
-
-### Using Docker
+<details>
+<summary>macOS: <code>~/Library/Application Support/Claude/claude_desktop_config.json</code></summary>
 
 ```json
 {
@@ -191,87 +76,249 @@ Add to your configuration file:
 }
 ```
 
-## ChatGPT Integration & HTTP Mode
+</details>
 
-### Running in HTTP Mode
+<details>
+<summary>Windows: <code>%APPDATA%\Claude\claude_desktop_config.json</code></summary>
 
-Start the server in HTTP mode for remote deployment:
+```json
+{
+  "mcpServers": {
+    "obsidian": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "C:\\ABSOLUTE\\PATH\\TO\\obsidian-mcp.env:/app/.env",
+        "ghcr.io/eddmann/obsidian-mcp:latest",
+        "stdio"
+      ]
+    }
+  }
+}
+```
+
+</details>
+
+Restart Claude Desktop and start chatting with your vault!
+
+<details>
+<summary><b>Prefer npm?</b> Click here for npm-based setup</summary>
 
 ```bash
-# Using npm
-npm run dev:http
+# 1. Clone and install
+git clone https://github.com/eddmann/obsidian-mcp
+cd obsidian-mcp
+npm install
 
-# Using Docker
+# 2. Configure credentials
+cp .env.example .env
+# Edit .env with your vault repo and git token
+```
+
+**3. Add to Claude Desktop config:**
+
+**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "obsidian": {
+      "command": "npm",
+      "args": ["run", "--prefix", "/ABSOLUTE/PATH/TO/obsidian-mcp", "dev"]
+    }
+  }
+}
+```
+
+**Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "obsidian": {
+      "command": "npm",
+      "args": ["run", "--prefix", "C:\\ABSOLUTE\\PATH\\TO\\obsidian-mcp", "dev"]
+    }
+  }
+}
+```
+
+</details>
+
+## How It Works
+
+This server is designed for **git-backed Obsidian vaults** managed by plugins like [obsidian-git](https://github.com/Vinzent03/obsidian-git).
+
+```mermaid
+graph LR
+    A[Git Repository] -->|1. Clone/Pull| B[MCP Server]
+    B -->|2. LLM Modifies| C[Local Vault Copy]
+    C -->|3. Auto Commit & Push| A
+    A -->|4. Sync| D[Obsidian Clients]
+
+    style B fill:#4a9eff
+    style C fill:#7c3aed
+```
+
+**Workflow:**
+
+1. Server clones/pulls your vault from git
+2. LLM makes changes through MCP tools
+3. Server automatically commits and pushes changes
+4. Your Obsidian clients pull to stay synchronized
+
+This enables LLM access without Obsidian being open, with all changes synchronized via git.
+
+## Prerequisites
+
+<details>
+<summary><b>System Requirements</b></summary>
+
+- Docker (recommended), OR Node.js 22+ and npm
+- AWS Account (only for Lambda deployment)
+</details>
+
+<details>
+<summary><b>Vault Requirements</b></summary>
+
+1. **Git-initialized Obsidian vault** - Your vault must be a git repository
+2. **Pushed to a remote** - Supports GitHub, GitLab, Bitbucket, or self-hosted
+3. **Git Personal Access Token** - See [Git Providers documentation](docs/GIT_PROVIDERS.md)
+4. **Sync-enabled (recommended)** - Use [obsidian-git](https://github.com/Vinzent03/obsidian-git) plugin for automatic sync
+</details>
+
+## Deployment Options
+
+### Claude Desktop (Local)
+
+**Using Docker:**
+
+See [Quick Start](#quick-start) above for the recommended Docker-based setup.
+
+<details>
+<summary><b>Prefer npm?</b> Click here for npm-based setup</summary>
+
+```bash
+# Clone and install
+git clone https://github.com/eddmann/obsidian-mcp
+cd obsidian-mcp
+npm install
+
+# Configure credentials
+cp .env.example .env
+# Edit .env with your vault repo and git token
+```
+
+**Claude Desktop config:**
+
+**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "obsidian": {
+      "command": "npm",
+      "args": ["run", "--prefix", "/ABSOLUTE/PATH/TO/obsidian-mcp", "dev"]
+    }
+  }
+}
+```
+
+**Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "obsidian": {
+      "command": "npm",
+      "args": ["run", "--prefix", "C:\\ABSOLUTE\\PATH\\TO\\obsidian-mcp", "dev"]
+    }
+  }
+}
+```
+
+</details>
+
+### ChatGPT & Remote Clients
+
+Run the server in HTTP mode with OAuth authentication:
+
+**Using Docker:**
+
+```bash
 docker run -p 3000:3000 --rm \
   -v "/ABSOLUTE/PATH/TO/obsidian-mcp.env:/app/.env" \
   ghcr.io/eddmann/obsidian-mcp:latest \
   http
 ```
 
-Environment variables can be configured in your `.env` file (see Installation & Setup above).
-
-## AWS Lambda Deployment
-
-Deploy to AWS Lambda for remote access with OAuth 2.0 authentication and DynamoDB session storage. This is ideal for accessing your vault from ChatGPT, Claude web, or other remote MCP clients.
-
-### Prerequisites
-
-Before deploying to AWS, ensure you have:
-
-- AWS CLI configured with valid credentials
-- AWS CDK installed (`npm install -g aws-cdk`)
-- All environment variables configured in `.env` (including OAuth variables)
-
-### Deployment Steps
+**Using npm:**
 
 ```bash
-# 1. Install dependencies
+# First clone the repo if you haven't already
+git clone https://github.com/eddmann/obsidian-mcp
+cd obsidian-mcp
 npm install
 
-# 2. Configure environment variables
+# Configure all environment variables (including OAuth)
 cp .env.example .env
-# Edit .env and fill in all required variables including:
-#   - VAULT_REPO, VAULT_BRANCH, GIT_TOKEN (git access)
-#   - OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, PERSONAL_AUTH_TOKEN (OAuth)
-#   - JOURNAL_* variables (journal configuration)
+# Edit .env
 
-# 3. Deploy to AWS
+# Run HTTP server
+npm run dev:http
+```
+
+**Required environment variables:**
+
+- All core variables (see `.env.example`)
+- OAuth variables: `OAUTH_CLIENT_ID`, `OAUTH_CLIENT_SECRET`, `PERSONAL_AUTH_TOKEN`, `BASE_URL`
+
+See [Deployment Guide](docs/DEPLOYMENT.md#http-mode) for detailed configuration and ChatGPT integration.
+
+### AWS Lambda
+
+Deploy to AWS Lambda for remote access with DynamoDB session storage:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/eddmann/obsidian-mcp
+cd obsidian-mcp
+
+# 2. Install dependencies
+npm install
+
+# 3. Configure all environment variables (including OAuth)
+cp .env.example .env
+# Edit .env
+
+# 4. Deploy to AWS
 npm run cdk:deploy
 ```
 
-### What Gets Deployed
+**What gets deployed:**
 
-The CDK stack provisions:
+- Lambda function (ARM64, 2GB memory, 10GB storage)
+- DynamoDB table with TTL-based sessions
+- Function URL with CORS enabled
+- CloudWatch logs (1-week retention)
 
-- **Lambda Function**: ARM64 function with Docker image build (2GB memory, 10GB ephemeral storage)
-- **DynamoDB Table**: Session storage with TTL-based expiration
-- **Function URL**: Public HTTPS endpoint with CORS enabled
-- **CloudWatch Logs**: Log group with 1-week retention
-
-### Post-Deployment Configuration
-
-After deployment:
-
-1. Note the Lambda Function URL from the deployment output
-2. Update `BASE_URL` in your `.env` file to match the Function URL
-3. Redeploy if you changed the BASE_URL: `npm run cdk:deploy`
-4. Use the Function URL for OAuth registration and MCP client configuration
-
-### Cleanup
-
-To remove all AWS resources:
+**Cleanup:**
 
 ```bash
 npm run cdk:destroy
 ```
 
-**Note**: The DynamoDB session table uses RETAIN removal policy. Manually delete the table from AWS Console after stack destruction if needed.
+See [Deployment Guide](docs/DEPLOYMENT.md#aws-lambda) for complete setup instructions.
 
-## Usage
+## Usage Examples
 
-Ask your LLM to interact with your Obsidian vault using natural language.
+Ask your LLM to interact with your vault using natural language:
 
-### File Operations
+<details>
+<summary><b>File Operations</b></summary>
 
 ```
 "Can you read my project note at Projects/MCP-Server.md?"
@@ -280,7 +327,10 @@ Ask your LLM to interact with your Obsidian vault using natural language.
 "Add a task list to my project plan under the Action Items section"
 ```
 
-### Directory Operations
+</details>
+
+<details>
+<summary><b>Directory Operations</b></summary>
 
 ```
 "Set up a new folder structure for my research papers"
@@ -288,7 +338,10 @@ Ask your LLM to interact with your Obsidian vault using natural language.
 "Show me all the PDFs in my Resources folder"
 ```
 
-### Search
+</details>
+
+<details>
+<summary><b>Search</b></summary>
 
 ```
 "Find all my notes about machine learning"
@@ -296,7 +349,10 @@ Ask your LLM to interact with your Obsidian vault using natural language.
 "Search my Projects folder for anything about deployment"
 ```
 
-### Tag Management
+</details>
+
+<details>
+<summary><b>Tag Management</b></summary>
 
 ```
 "Tag my meeting note with work and urgent"
@@ -304,7 +360,10 @@ Ask your LLM to interact with your Obsidian vault using natural language.
 "What tags am I using the most?"
 ```
 
-### Journal Logging
+</details>
+
+<details>
+<summary><b>Journal Logging</b></summary>
 
 ```
 "Log today's work: I implemented OAuth for the MCP server using TypeScript and AWS"
@@ -312,9 +371,14 @@ Ask your LLM to interact with your Obsidian vault using natural language.
 "Journal this: spent time learning TypeScript generics and created some helper utilities"
 ```
 
-## Available Tools
+</details>
+
+## Tool Reference
 
 ### File Operations (9 tools)
+
+<details>
+<summary>View all file operation tools</summary>
 
 | Tool               | Description                                                                                                       |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------- |
@@ -328,7 +392,14 @@ Ask your LLM to interact with your Obsidian vault using natural language.
 | `patch-content`    | Insert or update content at specific locations: headings, block identifiers, text matches, or YAML frontmatter    |
 | `apply-diff-patch` | Apply a unified diff patch to a file using standard diff format (strict matching, precise line-based changes)     |
 
+See [Tool Documentation](docs/TOOLS.md#file-operations) for detailed usage and examples.
+
+</details>
+
 ### Directory Operations (3 tools)
+
+<details>
+<summary>View all directory operation tools</summary>
 
 | Tool                  | Description                                                        |
 | --------------------- | ------------------------------------------------------------------ |
@@ -336,13 +407,27 @@ Ask your LLM to interact with your Obsidian vault using natural language.
 | `list-files-in-vault` | List all markdown files and directories in the vault root          |
 | `list-files-in-dir`   | List all files and subdirectories within a specific directory path |
 
+See [Tool Documentation](docs/TOOLS.md#directory-operations) for detailed usage and examples.
+
+</details>
+
 ### Search (1 tool)
+
+<details>
+<summary>View search tool</summary>
 
 | Tool           | Description                                                                                                              |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | `search-vault` | Search vault filenames and content using fuzzy matching (powered by fuse.js) or exact string matching with context lines |
 
+See [Tool Documentation](docs/TOOLS.md#search) for detailed usage and examples.
+
+</details>
+
 ### Tag Management (4 tools)
+
+<details>
+<summary>View all tag management tools</summary>
 
 | Tool          | Description                                                                       |
 | ------------- | --------------------------------------------------------------------------------- |
@@ -351,24 +436,41 @@ Ask your LLM to interact with your Obsidian vault using natural language.
 | `rename-tag`  | Rename a tag across all notes in the vault (updates both frontmatter and inline)  |
 | `manage-tags` | List all tags with usage counts, or merge multiple tags into a single unified tag |
 
+See [Tool Documentation](docs/TOOLS.md#tag-management) for detailed usage and examples.
+
+</details>
+
 ### Journal Logging (1 tool)
+
+<details>
+<summary>View journal logging tool</summary>
 
 | Tool                | Description                                                                                  |
 | ------------------- | -------------------------------------------------------------------------------------------- |
 | `log-journal-entry` | Log timestamped activity entries to daily journal files (auto-creates journal from template) |
 
-## Available Resources
+See [Tool Documentation](docs/TOOLS.md#journal-logging) for detailed usage and examples.
 
-MCP resources provide contextual information that LLMs can access on-demand without loading the data upfront.
+</details>
+
+## Resources
+
+MCP resources provide contextual information that LLMs can access on-demand.
 
 ### Vault README
 
-| Resource       | URI                       | Description                                                                                                                                          |
-| -------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `vault-readme` | `obsidian://vault-readme` | Provides access to the README.md file from your vault root containing organization guidelines, structure information, and vault-specific conventions |
+| Resource       | URI                       | Description                                                                                                                  |
+| -------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `vault-readme` | `obsidian://vault-readme` | Provides access to the README.md file from your vault root containing organization guidelines and vault-specific conventions |
 
-**Usage**: If your vault contains a README.md file in its root directory, LLMs can access it through this resource to understand how your vault is organized. This helps the LLM make better decisions about where to create files, how to structure notes, and follow your vault's conventions.
+If your vault contains a README.md file in its root directory, LLMs can access it to understand how your vault is organized.
+
+## Documentation
+
+- **[Tool Reference](docs/TOOLS.md)** - Detailed documentation for all 18 tools with usage examples
+- **[Deployment Guide](docs/DEPLOYMENT.md)** - Complete deployment instructions for all modes
+- **[Git Providers](docs/GIT_PROVIDERS.md)** - Setup instructions for GitHub, GitLab, Bitbucket, and self-hosted providers
 
 ## License
 
-MIT
+[MIT](LICENSE)
