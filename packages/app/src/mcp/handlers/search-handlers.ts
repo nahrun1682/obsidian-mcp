@@ -262,8 +262,8 @@ function findMatchingLines(
       // Exact matching: substring match
       isMatch = lineLower.includes(queryLower);
     } else {
-      // Fuzzy matching: all query tokens must appear in line (any order)
-      isMatch = queryTokens.every(token => lineLower.includes(token));
+      // Fuzzy matching: all query tokens must fuzzy-match words in line (any order)
+      isMatch = fuzzyMatchLine(lineLower, queryTokens);
     }
 
     if (isMatch) {
@@ -290,6 +290,23 @@ function findMatchingLines(
   }
 
   return matches;
+}
+
+function fuzzyMatchLine(line: string, queryTokens: string[]): boolean {
+  // Extract words from the line (alphanumeric sequences)
+  const lineWords = line.match(/\w+/g) || [];
+
+  // Check if each query token fuzzy-matches at least one word in the line
+  return queryTokens.every(queryToken => {
+    // Use Fuse.js to fuzzy match this token against line words
+    const fuse = new Fuse(lineWords, {
+      threshold: 0.4, // Same as file-level threshold
+      ignoreLocation: true,
+    });
+
+    const results = fuse.search(queryToken);
+    return results.length > 0;
+  });
 }
 
 function fuseScoreToRelevance(score: number): 1 | 2 | 3 | 4 {
