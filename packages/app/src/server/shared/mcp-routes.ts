@@ -55,9 +55,10 @@ export function registerMcpRoute(app: Express, mcpServer: McpServer): void {
   });
 
   app.get('/mcp', (_req, res) => {
-    res.status(405).json({
-      error: 'method_not_allowed',
-      error_description: 'SSE streaming is not supported in Lambda',
+    res.status(200).json({
+      status: 'ok',
+      message: 'MCP endpoint is POST /mcp',
+      auth: 'Bearer token required',
     });
   });
 
